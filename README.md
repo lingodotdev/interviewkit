@@ -26,18 +26,15 @@ pnpm install
 ### Development
 
 ```bash
-# Start web application
-cd apps/web
-pnpm dev
-
-# Start API server
-cd apps/api
+# Start all services in parallel with hot reload (API + Web)
 pnpm dev
 
 # Run CLI
 cd apps/cli
-pnpm start
+pnpm cli
 ```
+
+The `pnpm dev` command uses Turbo's terminal UI to run all development servers in parallel with hot reload. You can switch between process outputs using the interactive interface.
 
 ## Connect from TypeScript
 
