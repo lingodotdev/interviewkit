@@ -75,7 +75,7 @@ await redis.connect();
 ### Package Management & Build
 - **[PNPM](https://pnpm.io/)** - Fast, disk space efficient package manager
 - **[PNPM Workspaces](https://pnpm.io/workspaces)** - Monorepo workspace management
-- **[Turbo](https://turbo.build/repo)** - High-performance build system for monorepos
+- **[Turbo](https://turborepo.com/repo)** - High-performance build system for monorepos
 
 ### Backend
 - **[Hono](https://hono.dev/)** - Ultrafast web framework for the Edge
@@ -96,7 +96,7 @@ await redis.connect();
 - **[P-* Libraries](https://github.com/sindresorhus?tab=repositories&q=p-&type=&language=&sort=stargazers)** - Promise utility collection by Sindre Sorhus
 
 ### Frontend
-- **[Vite](https://vitejs.dev/)** - Next generation frontend tooling
+- **[Vite](https://vite.dev/)** - Next generation frontend tooling
 - **[TanStack Router](https://tanstack.com/router)** - Modern and scalable routing for React applications
 - **[shadcn/ui](https://ui.shadcn.com/)** - Beautifully designed components built with Radix UI and Tailwind CSS
 - **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
@@ -126,7 +126,7 @@ await redis.connect();
 - **[MongoDB Documentation](https://www.mongodb.com/docs/)** - Complete MongoDB reference
 - **[PostgreSQL Documentation](https://www.postgresql.org/docs/)** - Official PostgreSQL docs
 - **[Redis Documentation](https://redis.io/docs/)** - Complete Redis reference and capabilities
-  - **[Redis Caching Guide](https://redis.io/docs/latest/develop/use/patterns/caching/)** - Caching patterns and best practices
+  - **[Redis Caching](https://redis.io/docs/latest/develop/use/client-side-caching/)** - Client-side caching patterns and strategies
   - **[Redis Pub/Sub](https://redis.io/docs/latest/develop/interact/pubsub/)** - Publish/Subscribe messaging patterns
   - **[Redis Data Types](https://redis.io/docs/latest/develop/data-types/)** - Strings, Lists, Sets, Hashes, and more
   - **[Redis Commands Reference](https://redis.io/docs/latest/commands/)** - Complete command documentation
