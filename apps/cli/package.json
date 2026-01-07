@@ -10,10 +10,7 @@
   "dependencies": {
     "@task/api": "workspace:*",
     "@task/config": "workspace:*",
-    "@task/demo-package": "workspace:*",
     "@task/plugin": "workspace:*",
-    "@task/plugin-json": "workspace:*",
-    "@task/plugin-yaml": "workspace:*",
     "commander": "^14.0.2",
     "consola": "^3.4.2",
     "hono": "^4.11.3",
