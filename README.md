@@ -1,15 +1,55 @@
 # InterviewKit
 
-A modern full-stack monorepo project showcasing best practices in TypeScript development, featuring API services, CLI tools, and web applications.
+## Tech Stack
+
+| Layer | Technologies |
+|-------|-------------|
+| **Monorepo** | [pnpm](https://pnpm.io/) workspaces, [Turborepo](https://turborepo.com/repo) |
+| **Backend** | [Hono](https://hono.dev/), [MongoDB](https://www.mongodb.com/docs/drivers/node/current/), [Redis](https://redis.io/docs/) |
+| **CLI** | [Commander.js](https://github.com/tj/commander.js), [Consola](https://github.com/unjs/consola), [tsx](https://tsx.is/) |
+| **Frontend** | [React](https://react.dev/), [Vite](https://vite.dev/), [TanStack Router](https://tanstack.com/router) & [Query](https://tanstack.com/query), [shadcn/ui](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com/) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) across the board |
+
+## Architecture
+
+```
+interviewkit/
+├── apps/
+│   ├── api/        → Hono backend       (port 3001)
+│   ├── cli/        → Commander.js CLI
+│   └── web/        → React + Vite app   (port 3000)
+├── packages/
+│   ├── config/     → Shared configuration (ports, DB URIs)
+│   └── plugin/     → File format plugins (JSON, etc.)
+├── docker-compose.yml   → MongoDB + Redis
+└── turbo.json           → Build orchestration
+```
+
+**Turborepo** runs tasks (dev, build, lint) across all apps/packages in parallel, respecting dependency order. `pnpm dev` starts everything at once.
+
+**pnpm workspaces** lets packages reference each other via `workspace:*` — e.g. the CLI imports `@task/config` and `@task/plugin` directly.
 
 ## Quick Start
 
-### Start Services
-
 ```bash
-# Start MongoDB and Redis
+# 1. Start MongoDB and Redis
 docker compose up -d
 
+# 2. Install dependencies
+pnpm install
+
+# 3. Start all services (API + Web) with hot reload
+pnpm dev
+
+# 4. Run CLI (in a separate terminal)
+cd apps/cli
+pnpm cli
+pnpm cli health
+```
+
+`pnpm dev` uses Turbo's terminal UI — switch between process outputs with the interactive interface.
+
+```bash
 # Stop services
 docker compose down
 
@@ -17,26 +57,58 @@ docker compose down
 docker compose down -v
 ```
 
-### Install Dependencies
+## Packages
 
-```bash
-pnpm install
+### `@task/config`
+
+Shared configuration used across all apps:
+
+```typescript
+import { config } from '@task/config';
+
+config.api.port    // 3001
+config.api.url     // 'http://localhost:3001'
+config.web.port    // 3000
+config.db.mongodb  // { uri, dbName }
+config.db.redis    // { url, port }
 ```
 
-### Development
+### `@task/plugin`
 
-```bash
-# Start all services in parallel with hot reload (API + Web)
-pnpm dev
+Provides the `Plugin` interface and `definePlugin` helper for building file format plugins. Each locale is stored as a separate file with flat key-value pairs:
 
-# Run CLI
-cd apps/cli
-pnpm cli
+```
+data/
+├── en.json    → { "title": "My App", "greeting": "Hello!" }
+└── es.json    → { "title": "Mi App", "greeting": "¡Hola!" }
 ```
 
-The `pnpm dev` command uses Turbo's terminal UI to run all development servers in parallel with hot reload. You can switch between process outputs using the interactive interface.
+```typescript
+import { definePlugin, type Plugin } from '@task/plugin';
 
-## Connect from TypeScript
+// Plugin interface:
+// {
+//   extension: string
+//   serialize:   (data: Record<string, string>) => string
+//   deserialize: (raw: string) => Record<string, string>
+// }
+```
+
+## API
+
+The API uses [Hono](https://hono.dev/) with a type-safe RPC client. The CLI already demonstrates this pattern:
+
+```typescript
+import { hc } from 'hono/client';
+import type { ApiType } from '@task/api';
+import { config } from '@task/config';
+
+const client = hc<ApiType>(config.api.url);
+const res = await client.health.$get();
+const data = await res.json();
+```
+
+## Database Connections
 
 ### MongoDB
 
@@ -45,6 +117,7 @@ import { MongoClient } from 'mongodb';
 
 const client = new MongoClient('mongodb://admin:password@localhost:27017');
 await client.connect();
+const db = client.db('localize');
 ```
 
 ### Redis
@@ -52,81 +125,45 @@ await client.connect();
 ```typescript
 import { createClient } from 'redis';
 
-const redis = createClient({
-  url: 'redis://localhost:6379'
-});
+const redis = createClient({ url: 'redis://localhost:6379' });
 await redis.connect();
 ```
 
-## Materials
+## Reference
 
-### Development Environment & Tools
-- **[Claude Code](https://github.com/anthropics/claude-code)** - AI-powered coding assistant
-- **[.mcp.json](https://modelcontextprotocol.io/)** - Model Context Protocol configuration
-- **[CLAUDE.md](https://github.com/anthropics/claude-code)** - Project-specific Claude instructions
-
-### Infrastructure & Deployment
-- **[Docker](https://docs.docker.com/)** - Containerization platform
-- **[Docker Compose](https://docs.docker.com/compose/)** - Multi-container orchestration
-
-### Package Management & Build
-- **[PNPM](https://pnpm.io/)** - Fast, disk space efficient package manager
-- **[PNPM Workspaces](https://pnpm.io/workspaces)** - Monorepo workspace management
-- **[Turbo](https://turborepo.com/repo)** - High-performance build system for monorepos
+### Core Tools
+- [pnpm Workspaces](https://pnpm.io/workspaces) — monorepo workspace management
+- [Turborepo Docs](https://turborepo.com/repo/docs) — build system for monorepos
+- [Docker Compose](https://docs.docker.com/compose/) — container orchestration
 
 ### Backend
-- **[Hono](https://hono.dev/)** - Ultrafast web framework for the Edge
-- **[Nodemon](https://nodemon.io/)** - Hot reload for Node.js development
-- **[MongoDB Node Driver](https://www.mongodb.com/docs/drivers/node/current/)** - Official MongoDB driver for Node.js
-- **[node-redis](https://github.com/redis/node-redis)** - Redis client for Node.js
+- [Hono](https://hono.dev/) — web framework
+- [Hono RPC Client](https://hono.dev/docs/guides/rpc) — type-safe API client
+- [MongoDB Node Driver](https://www.mongodb.com/docs/drivers/node/current/) — database driver
+- [Redis for Node.js](https://github.com/redis/node-redis) — Redis client
+  - [Pub/Sub](https://redis.io/docs/latest/develop/interact/pubsub/) — publish/subscribe messaging
+  - [Data Types](https://redis.io/docs/latest/develop/data-types/) — strings, lists, sets, hashes
 
-### Runtime & Language
-- **[TSX](https://tsx.is/)** - TypeScript execute - Run TypeScript & ESM files without compilation
-- **[TypeScript](https://www.typescriptlang.org/)** - Typed JavaScript superset
-
-### CLI Development
-- **[Commander.js](https://github.com/tj/commander.js)** - Complete solution for node.js command-line interfaces
-- **[Consola](https://github.com/unjs/consola)** - Elegant console logger for Node.js and Browser
-
-### Utilities
-- **[p-limit](https://github.com/sindresorhus/p-limit)** - Run multiple promise-returning & async functions with limited concurrency
-- **[P-* Libraries](https://github.com/sindresorhus?tab=repositories&q=p-&type=&language=&sort=stargazers)** - Promise utility collection by Sindre Sorhus
+### CLI
+- [Commander.js](https://github.com/tj/commander.js) — CLI framework
+- [Consola](https://github.com/unjs/consola) — console logger
+- [p-limit](https://github.com/sindresorhus/p-limit) — concurrency control
 
 ### Frontend
-- **[Vite](https://vite.dev/)** - Next generation frontend tooling
-- **[TanStack Router](https://tanstack.com/router)** - Modern and scalable routing for React applications
-- **[shadcn/ui](https://ui.shadcn.com/)** - Beautifully designed components built with Radix UI and Tailwind CSS
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
-- **[Motion](https://motion.dev/)** - Production-ready animation library for React (formerly Framer Motion)
+- [Vite](https://vite.dev/) — build tool
+- [TanStack Router](https://tanstack.com/router) — file-based routing
+- [TanStack Query](https://tanstack.com/query) — async state management
+- [shadcn/ui](https://ui.shadcn.com/) — UI components
+- [Tailwind CSS](https://tailwindcss.com/) — utility-first CSS
+- [Lucide Icons](https://lucide.dev/) — icon library
 
-### Async Patterns & Streaming
-- **[Async Iterators (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of)** - Asynchronous iteration protocol
-- **[Async Generators (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncGenerator)** - Functions that return async iterables
-- **[JavaScript Generators (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator)** - Generator functions and iteration
-- **[Node.js Streams](https://nodejs.org/api/stream.html)** - Official Node.js streaming API documentation
-  - **[Stream Consumers](https://nodejs.org/api/webstreams.html#stream-consumers)** - Working with streams
-  - **[Pipeline](https://nodejs.org/api/stream.html#streampipelinesource-transforms-destination-callback)** - Piping streams together
-- **[Web Streams API (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API)** - Browser streaming standard
-  - **[ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)** - Reading data streams
-  - **[WritableStream](https://developer.mozilla.org/en-US/docs/Web/API/WritableStream)** - Writing data streams
-  - **[TransformStream](https://developer.mozilla.org/en-US/docs/Web/API/TransformStream)** - Transforming data in streams
-- **[Server-Sent Events (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)** - One-way real-time server-to-client communication
-  - **[EventSource API](https://developer.mozilla.org/en-US/docs/Web/API/EventSource)** - Client-side SSE interface
-- **[WebSockets (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)** - Full-duplex real-time communication
-  - **[WebSocket Client API](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)** - Browser WebSocket interface
-  - **[ws Library](https://github.com/websockets/ws)** - Node.js WebSocket library
+### Real-time & Streaming
+- [Server-Sent Events (SSE)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) — server-to-client streaming
+- [EventSource API](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) — SSE client
+- [WebSockets (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) — full-duplex communication
+- [ws Library](https://github.com/websockets/ws) — Node.js WebSocket library
 
-### Books
-- **[Head First Design Patterns](https://www.amazon.com/Head-First-Design-Patterns-Object-Oriented/dp/149207800X/)** - Essential guide to software design patterns
-
-### Documentation
-- **[MongoDB Documentation](https://www.mongodb.com/docs/)** - Complete MongoDB reference
-- **[PostgreSQL Documentation](https://www.postgresql.org/docs/)** - Official PostgreSQL docs
-- **[Redis Documentation](https://redis.io/docs/)** - Complete Redis reference and capabilities
-  - **[Redis Caching](https://redis.io/docs/latest/develop/use/client-side-caching/)** - Client-side caching patterns and strategies
-  - **[Redis Pub/Sub](https://redis.io/docs/latest/develop/interact/pubsub/)** - Publish/Subscribe messaging patterns
-  - **[Redis Data Types](https://redis.io/docs/latest/develop/data-types/)** - Strings, Lists, Sets, Hashes, and more
-  - **[Redis Commands Reference](https://redis.io/docs/latest/commands/)** - Complete command documentation
-- **[DBMate](https://github.com/amacneil/dbmate)** - Database migration tool
-- **[Docker Documentation](https://docs.docker.com/)** - Docker guides and reference
-- **[Docker Compose Documentation](https://docs.docker.com/compose/)** - Multi-container application guide
+### Development
+- [Claude Code](https://github.com/anthropics/claude-code) — AI-powered coding assistant
+- [TypeScript](https://www.typescriptlang.org/) — typed JavaScript
+- [tsx](https://tsx.is/) — run TypeScript without compilation
