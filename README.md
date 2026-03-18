@@ -1,5 +1,19 @@
 # InterviewKit
 
+> **Recommended reading:** [Head First Design Patterns](https://www.amazon.com/Head-First-Design-Patterns-Object-Oriented/dp/149207800X/) — a beginner-friendly, easy-going walkthrough of design patterns. Highly recommended for successful completion of this exercise.
+
+## Table of Contents
+
+- [Tech Stack](#tech-stack) — what's used across the project
+- [Architecture](#architecture) — monorepo layout and how things connect
+- [Quick Start](#quick-start) — get up and running
+- [Packages](#packages) — shared libraries (`@task/config`, `@task/plugin`)
+- [API](#api) — Hono backend and type-safe RPC client
+- [Database Connections](#database-connections) — MongoDB and Redis snippets
+- [Reference](#reference) — links to all relevant documentation
+
+---
+
 ## Tech Stack
 
 | Layer | Technologies |
