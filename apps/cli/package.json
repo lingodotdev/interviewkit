@@ -1,0 +1,25 @@
+{
+  "name": "@task/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "lng": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@task/api": "workspace:*",
+    "@task/config": "workspace:*",
+    "@task/plugin-contract": "workspace:*",
+    "commander": "^15.0.0",
+    "consola": "^3.4.2",
+    "hono": "^4.13.7",
+    "p-limit": "^7.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.4",
+    "typescript": "^7.0.2"
+  }
+}

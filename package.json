@@ -1,0 +1,23 @@
+{
+  "name": "interviewkit",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "oxlint",
+    "cli": "pnpm --filter @task/demo cli",
+    "db:migrate": "dbmate up",
+    "db:status": "dbmate status"
+  },
+  "devDependencies": {
+    "oxlint": "^1.82.0",
+    "turbo": "^2.10.12",
+    "typescript": "^7.0.2"
+  },
+  "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=24"
+  }
+}

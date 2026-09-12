@@ -1,0 +1,26 @@
+{
+  "name": "@task/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.ts",
+    "start": "node src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.23.1",
+    "@hono/node-server": "^2.1.1",
+    "@task/config": "workspace:*",
+    "consola": "^3.4.2",
+    "hono": "^4.13.7",
+    "redis": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.4",
+    "typescript": "^7.0.2"
+  }
+}
